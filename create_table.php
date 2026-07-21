@@ -84,3 +84,8 @@ try {
     echo "❌ エラー: " . $e->getMessage();
 }
 ?>
+
+} catch (PDOException $e) {
+    echo "❌ エラー: " . $e->getMessage();
+}
+?>
