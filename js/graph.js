@@ -4,7 +4,7 @@ import java.awt.*;
 public class PieChartPanel extends JPanel {
     private final double[] values = {30, 20, 50};
     private final Color[] colors = {Color.RED, Color.GREEN, Color.BLUE};
-    private final String[] labels = {"Apple", "Banana", "Cherry"};
+    private final String[] labels = {"A", "B", "C"};
 
     @Override
     protected void paintComponent(Graphics g) {
