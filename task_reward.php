@@ -274,11 +274,45 @@ $chart_json = json_encode($chart_summary, JSON_UNESCAPED_UNICODE);
     <!--         メンバーC（円グラフ担当）へデータを渡す橋渡し -->
     <!-- ========================================================== -->
     <script>
-        // メンバーCへ：この taskChartData 配列を使って円グラフ（Chart.js等）を描画してください！
+        // 円グラフ用データをグローバルにセット
         window.taskChartData = <?php echo $chart_json; ?>;
         console.log('【メンバーC用】円グラフデータ:', window.taskChartData);
     </script>
-    <script src="js/graph.js"></script> <!-- メンバーCが作るJSファイル -->
+
+    <!-- Canvas for pie chart -->
+    <div style="width: 400px; max-width: 90%; margin: 20px 0;">
+        <canvas id="taskPieChart"></canvas>
+    </div>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        (function(){
+            const raw = window.taskChartData || [];
+            // Expecting array of objects: [{label: '...', value: 10}, ...]
+            const labels = raw.map(r => r.label || r.subject || '項目');
+            const data = raw.map(r => Number(r.value || r.count || r.points || 0));
+
+            const ctx = document.getElementById('taskPieChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: [
+                            '#4e79a7','#f28e2b','#e15759','#76b7b2','#59a14f','#edc949','#af7aa1','#ff9da7','#9c755f','#bab0ac'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        })();
+    </script>
 
 </body>
 </html>
+
