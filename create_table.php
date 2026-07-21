@@ -1,6 +1,21 @@
 <?php
 require_once 'config/db_config.php';
 
+$check = $pdo->query("SHOW TABLES LIKE 'self_study_units'");
+$table_exists = $check->fetch() !== false;
+
+$force = isset($_GET['force']) && $_GET['force'] === '1';
+
+// テーブルが既にあって、force指定も無いなら、ここで止める
+if ($table_exists && !$force) {
+    echo "⚠️ self_study_units テーブルは既に存在します。<br>";
+    echo "このまま実行すると、これまでの理解度の進捗が全て消えて初期化されます。<br><br>";
+    echo "本当に作り直したい場合は、";
+    echo "<a href='create_table.php?force=1' onclick=\"return confirm('本当に全ての進捗をリセットしますか？この操作は取り消せません。');\">";
+    echo "こちらをクリックして強制的に再作成</a>してください。";
+    exit; // ここで処理を終了。DROPさせない
+}
+
 try {
     // 既存テーブル削除（構造変更のため）
     $pdo->exec("DROP TABLE IF EXISTS self_study_units");
