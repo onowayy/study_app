@@ -149,6 +149,22 @@ unset($task); // 参照渡しを解除
 usort($raw_tasks, function($a, $b) {
     return $b['priority_score'] <=> $a['priority_score'];
 });
+// ==========================================================
+// 【Step 8】メンバーC（フロント・円グラフ）用データの集計
+// ==========================================================
+// 科目ごとに「全体の課題数」と「完了した課題数」をSQLでカウント[cite: 2]
+$chartStmt = $pdo->query("
+    SELECT 
+        subject,
+        COUNT(*) as total_count,
+        SUM(CASE WHEN is_completed = 1 THEN 1 ELSE 0 END) as completed_count
+    FROM tasks
+    GROUP BY subject
+");
+$chart_summary = $chartStmt->fetchAll(PDO::FETCH_ASSOC);
+
+// メンバーCがJSでそのまま扱えるようにJSON形式に変換しておく
+$chart_json = json_encode($chart_summary, JSON_UNESCAPED_UNICODE);
 ?>
 
 <!DOCTYPE html>
@@ -265,6 +281,17 @@ usort($raw_tasks, function($a, $b) {
             <?php endif; ?>
         </tbody>
     </table>
+<!-- ========================================================== -->
+    <!-- 【Step 8】メンバーC（円グラフ担当）へデータを渡す橋渡し -->
+    <!-- ========================================================== -->
+    <script>
+        // メンバーCへ：この taskChartData 配列を使って円グラフ（Chart.js等）を描画してください！
+        window.taskChartData = <?php echo $chart_json; ?>;
+        console.log('【メンバーC用】円グラフデータ:', window.taskChartData);
+    </script>
+    <script src="js/graph.js"></script> <!-- メンバーCが作るJSファイル -->
 
+</body>
+</html>
 </body>
 </html>
