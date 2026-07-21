@@ -65,6 +65,7 @@ foreach ($subjects as $key => $name) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>段階的・自習進捗管理</title>
+    <link rel="stylesheet" href="css/style.css">
     <style>
         body { font-family: sans-serif; max-width: 900px; margin: 20px auto; padding: 0 15px; background: #f4f6f8; }
         .subject-block { background: #fff; border-radius: 10px; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
@@ -89,6 +90,8 @@ foreach ($subjects as $key => $name) {
     </style>
 </head>
 <body>
+
+    <?php require_once __DIR__ . '/header.php'; ?>
 
     <h1>📈 自習ステップアップ・進捗管理</h1>
 
