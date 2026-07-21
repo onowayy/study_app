@@ -77,6 +77,17 @@
             </button>
 
         </form>
+    <hr>
+
+    <h2>🏖 ボトルを拾う</h2>
+
+    <form action="db/pickup_mail.php" method="GET">
+
+        <button type="submit">
+            📩 ボトルを拾う
+        </button>
+
+    </form>
 
     </div>
 
