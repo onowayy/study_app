@@ -11,6 +11,8 @@
 
 <body>
 
+    <?php require_once __DIR__ . '/header.php'; ?>
+
     <div class="container">
 
         <h1>🌊 ボトルメール 🌊</h1>
