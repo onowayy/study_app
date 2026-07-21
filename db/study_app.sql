@@ -18,7 +18,11 @@ CREATE TABLE IF NOT EXISTS user_status (
     id INT PRIMARY KEY,
     materials INT DEFAULT 0,
     food INT DEFAULT 0,
-    math_level INT DEFAULT 1
+    math_level INT DEFAULT 1,
+    english_level INT DEFAULT 1,
+    physics_level INT DEFAULT 1,
+    chemistry_level INT DEFAULT 1,
+    information_level INT DEFAULT 1
 );
 
 -- メンバーE担当：ボトルメールテーブル
