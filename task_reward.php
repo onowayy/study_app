@@ -181,7 +181,7 @@ $chart_json = json_encode($chart_summary, JSON_UNESCAPED_UNICODE);
             <strong>エサ（food）:</strong> <?php echo $user_status['food'] ?? 0; ?> | <br>
             <strong>数学レベル:</strong> Lv.<?php echo $user_status['math_level'] ?? 1; ?> | 
             <strong>英語レベル:</strong> Lv.<?php echo $user_status['eng_level'] ?? 1; ?> | 
-            <strong>理科レベル:</strong> Lv.<?php echo $user_status['rikei_level'] ?? 1; ?>
+            <strong>理系レベル:</strong> Lv.<?php echo $user_status['rikei_level'] ?? 1; ?>
         </p>
     </div>
 
