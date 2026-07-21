@@ -33,20 +33,12 @@ if (isset($_POST['complete_task_id'])) {
                     $subject_label = "数学";
                     break;
                 case '英語':
-                    $level_column = "english_level";
+                    $level_column = "eng_level";
                     $subject_label = "英語";
                     break;
-                case '物理': 
-                    $level_column = "physics_level";
-                    $subject_label = "物理";
-                    break;
-                case '化学': 
-                    $level_column = "chemistry_level";
-                    $subject_label = "化学";
-                    break;
-                case '情報': 
-                    $level_column = "information_level";
-                    $subject_label = "情報";
+                case '理系': 
+                    $level_column = "rikei_level";
+                    $subject_label = "理系";
                     break;
             }
 
@@ -179,11 +171,7 @@ $chart_json = json_encode($chart_summary, JSON_UNESCAPED_UNICODE);
 </head>
 <body style="font-family: Arial, sans-serif; margin: 30px; line-height: 1.6;">
 
-    <div style="margin-bottom: 15px;">
-        <a href="island_game.php" style="font-weight:bold; font-size:1.1em; color:#2e7d32; text-decoration: none; background-color: #e8f5e9; padding: 8px 15px; border-radius: 5px; border: 1px solid #4caf50;">
-            🏝️ 島を開拓しに行く！
-        </a>
-    </div>
+    <?php require_once __DIR__ . '/header.php'; ?>
 
     <h1>📚 課題管理 ＆ 自動ソートロジック（メンバーB担当）</h1>
     <?php echo $message; ?>
@@ -194,10 +182,8 @@ $chart_json = json_encode($chart_summary, JSON_UNESCAPED_UNICODE);
             <strong>建築資材（materials）:</strong> <?php echo $user_status['materials'] ?? 0; ?> | 
             <strong>エサ（food）:</strong> <?php echo $user_status['food'] ?? 0; ?> | <br>
             <strong>数学レベル:</strong> Lv.<?php echo $user_status['math_level'] ?? 1; ?> | 
-            <strong>英語レベル:</strong> Lv.<?php echo $user_status['english_level'] ?? 1; ?> | 
-            <strong>物理レベル:</strong> Lv.<?php echo $user_status['physics_level'] ?? 1; ?>
-            <strong>化学レベル:</strong> Lv.<?php echo $user_status['chemistry_level'] ?? 1; ?>
-            <strong>情報レベル:</strong> Lv.<?php echo $user_status['information_level'] ?? 1; ?>
+            <strong>英語レベル:</strong> Lv.<?php echo $user_status['eng_level'] ?? 1; ?> | 
+            <strong>理系レベル:</strong> Lv.<?php echo $user_status['rikei_level'] ?? 1; ?>
         </p>
     </div>
 
@@ -214,9 +200,7 @@ $chart_json = json_encode($chart_summary, JSON_UNESCAPED_UNICODE);
                 <select name="subject" required style="width: 93%;">
                     <option value="数学">数学</option>
                     <option value="英語">英語</option>
-                    <option value="物理">物理</option>
-                    <option value="化学">化学</option>
-                    <option value="情報">情報</option>
+                    <option value="理系">理系</option>
                 </select>
             </p>
             <p>
@@ -292,11 +276,45 @@ $chart_json = json_encode($chart_summary, JSON_UNESCAPED_UNICODE);
     <!--         メンバーC（円グラフ担当）へデータを渡す橋渡し -->
     <!-- ========================================================== -->
     <script>
-        // メンバーCへ：この taskChartData 配列を使って円グラフ（Chart.js等）を描画してください！
+        // 円グラフ用データをグローバルにセット
         window.taskChartData = <?php echo $chart_json; ?>;
         console.log('【メンバーC用】円グラフデータ:', window.taskChartData);
     </script>
-    <script src="js/graph.js"></script> <!-- メンバーCが作るJSファイル -->
+
+    <!-- Canvas for pie chart -->
+    <div style="width: 400px; max-width: 90%; margin: 20px 0;">
+        <canvas id="taskPieChart"></canvas>
+    </div>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        (function(){
+            const raw = window.taskChartData || [];
+            // Expecting array of objects: [{label: '...', value: 10}, ...]
+            const labels = raw.map(r => r.label || r.subject || '項目');
+            const data = raw.map(r => Number(r.value || r.count || r.points || 0));
+
+            const ctx = document.getElementById('taskPieChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: [
+                            '#4e79a7','#f28e2b','#e15759','#76b7b2','#59a14f','#edc949','#af7aa1','#ff9da7','#9c755f','#bab0ac'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        })();
+    </script>
 
 </body>
 </html>
+
