@@ -11,15 +11,7 @@ require_once 'config/db_config.php';
 </head>
 <body>
 
-    <header>
-        <h1>勉強大好きアプリ（仮）</h1>
-        <nav>
-            <!-- ここで各メンバーが担当するファイルへのリンクをつなぐ -->
-            <a href="index.php">ホーム（島とグラフ）</a> | 
-            <a href="task_reward.php">課題管理と報酬</a> | 
-            <a href="bottle_mail.php">ボトルメール</a>
-        </nav>
-    </header>
+    <?php require_once __DIR__ . '/header.php'; ?>
 
     <main>
         <h2>メイン画面（防衛ライン検証用）</h2>
