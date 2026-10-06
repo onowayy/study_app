@@ -2,7 +2,7 @@
 // ==========================================
 // 全ページ共通のヘッダー・ナビゲーション
 // 各ページの <body> 直後で
-//   <?php require_once __DIR__ . '/header.php'; ?>
+//   <?php require_once __DIR__ . '/header.php'; ? >
 // として読み込む
 // ==========================================
 $current_page = basename($_SERVER['SCRIPT_NAME']);
