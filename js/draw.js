@@ -15,48 +15,41 @@ ctx.strokeStyle = "black";
 
 // 線の端を丸くする
 ctx.lineCap = "round";
-canvas.addEventListener("mousedown", function(e){
 
+// 画面上の位置 → キャンバス内の座標（CSSで縮小表示されても合うように補正）
+function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+        x: (e.clientX - rect.left) * (canvas.width / rect.width),
+        y: (e.clientY - rect.top) * (canvas.height / rect.height)
+    };
+}
+
+canvas.addEventListener("pointerdown", function (e) {
     drawing = true;
-
+    canvas.setPointerCapture(e.pointerId);
+    const p = getPos(e);
     ctx.beginPath();
-
-    ctx.moveTo(e.offsetX, e.offsetY);
-
+    ctx.moveTo(p.x, p.y);
 });
-canvas.addEventListener("mousemove", function(e){
 
-    if(!drawing){
-
+canvas.addEventListener("pointermove", function (e) {
+    if (!drawing) {
         return;
-
     }
-
-    ctx.lineTo(e.offsetX, e.offsetY);
-
+    const p = getPos(e);
+    ctx.lineTo(p.x, p.y);
     ctx.stroke();
-
 });
-canvas.addEventListener("mouseup", function(){
 
+function stopDrawing() {
     drawing = false;
+}
+canvas.addEventListener("pointerup", stopDrawing);
+canvas.addEventListener("pointercancel", stopDrawing);
 
-});
-canvas.addEventListener("mouseleave", function(){
+const clearButton = document.getElementById("clearCanvas");
 
-    drawing = false;
-
-});
-const clearButton =
-document.getElementById("clearCanvas");
-
-clearButton.addEventListener("click", function(){
-
-    ctx.clearRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-    );
-
+clearButton.addEventListener("click", function () {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 });

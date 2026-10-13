@@ -27,78 +27,68 @@ if ($mail) {
     $log->execute([":id" => $mail["id"], ":t" => $client_id]);
 }
 
+// ヘッダー（ナビ）を db/ 配下から読み込むための設定
+$nav_base = '../';
+$nav_active = 'bottle_mail.php';
 ?>
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ボトル開封</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/bottle_mail.css">
 </head>
 <body>
 
-<h1>📩 ボトルを開封しました</h1>
+    <?php require_once __DIR__ . '/../header.php'; ?>
 
-<?php if($mail): ?>
+    <div class="page-wrap">
 
-    <h3>メッセージ</h3>
+        <h1>✉️ ボトルメール</h1>
 
-    <p>
-        <?=
-            $mail["message"] === ""
-            ? "（メッセージなし）"
-            : nl2br(htmlspecialchars($mail["message"]))
-        ?>  
-    </p>
-    <h3>お絵描き</h3>
+        <div class="panel">
+            <h3>📩 ボトルを開封しました</h3>
 
-    <?php if(!empty($mail["canvas_data"])): ?>
+            <?php if ($mail): ?>
 
-        <img
-            src="<?= htmlspecialchars($mail["canvas_data"], ENT_QUOTES, "UTF-8") ?>"
-            width="400">
+                <div class="history-item">
+                    <div class="section-label" style="margin-top:0;">メッセージ</div>
+                    <div class="history-msg">
+                        <?= $mail["message"] === ""
+                            ? '<span class="muted">（メッセージなし）</span>'
+                            : nl2br(h($mail["message"])) ?>
+                    </div>
 
-    <?php else: ?>
+                    <div class="section-label">お絵描き</div>
+                    <?php if (!empty($mail["canvas_data"]) && strpos($mail["canvas_data"], "data:image/") === 0): ?>
+                        <img class="history-img" alt="お絵描き" src="<?= h($mail["canvas_data"]) ?>">
+                    <?php else: ?>
+                        <p class="muted" style="margin:0;">絵はありません。</p>
+                    <?php endif; ?>
+                </div>
 
-        <p>絵はありません。</p>
+                <div class="section-label">リアクション</div>
+                <div class="btn-row">
+                    <button type="button" class="btn btn-primary btn-lg" onclick="alert('ナイス！を送りました！')">👍 ナイス！</button>
+                    <button type="button" class="btn btn-primary btn-lg" onclick="alert('がんばれ！を送りました！')">🔥 がんばれ！</button>
+                    <button type="button" class="btn btn-primary btn-lg" onclick="alert('いいね！を送りました！')">😊 いいね！</button>
+                </div>
 
-    <?php endif; ?>
+            <?php else: ?>
 
-    <hr>
+                <p class="history-empty" style="margin:0;">まだボトルが流れていません。</p>
 
-    <h3>リアクション</h3>
+            <?php endif; ?>
+        </div>
 
-    <button
-        type="button"
-        onclick="alert('ナイス！を送りました！')">
-        👍 ナイス！
-    </button>
+        <div class="btn-row">
+            <a href="../bottle_mail.php" class="btn btn-primary btn-lg">戻る</a>
+            <a href="../bottle_mail.php#history" class="btn btn-gray btn-lg">送受信履歴を見る</a>
+        </div>
 
-    <button
-        type="button"
-        onclick="alert('がんばれ！を送りました！')">
-        🔥 がんばれ！
-    </button>
-
-    <button
-        type="button"
-        onclick="alert('いいね！を送りました！')">
-        😊 いいね！
-    </button>
-
-<?php else: ?>
-
-    <p>まだボトルが流れていません。</p>
-
-<?php endif; ?>
-
-<br>
-
-<a href="../bottle_mail.php">
-    戻る
-</a>
-｜
-<a href="../bottle_mail.php#history">送受信履歴を見る</a>
+    </div>
 
 </body>
 </html>

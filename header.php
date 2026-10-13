@@ -2,11 +2,15 @@
 // ==========================================
 // 全ページ共通のヘッダー・ナビゲーション
 // ==========================================
-$current_page = basename($_SERVER['SCRIPT_NAME']);
+// db/ 配下のページから読み込む場合は、呼び出し側で $nav_base = '../' と
+// $nav_active = 'bottle_mail.php' を指定する
+$nav_base = $nav_base ?? '';
+$current_page = $nav_active ?? basename($_SERVER['SCRIPT_NAME']);
 
 function nav_link($href, $label, $icon, $current_page) {
+    global $nav_base;
     $active_class = ($href === $current_page) ? ' active' : '';
-    echo "<a href=\"{$href}\" class=\"nav-btn{$active_class}\">";
+    echo "<a href=\"{$nav_base}{$href}\" class=\"nav-btn{$active_class}\">";
     echo "<span class=\"icon\">{$icon}</span>{$label}";
     echo "</a>";
 }

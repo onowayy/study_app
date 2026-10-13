@@ -30,7 +30,7 @@ function render_mail_item(array $m, string $date, string $meta = ''): void {
     echo '<div class="history-item">';
     echo '<div class="history-date">' . h($date) . ($meta !== '' ? ' ／ ' . h($meta) : '') . '</div>';
     echo '<div class="history-msg">' . ($m['message'] === '' || $m['message'] === null
-        ? '<span style="color:#888;">（メッセージなし）</span>'
+        ? '<span class="muted">（メッセージなし）</span>'
         : nl2br(h($m['message']))) . '</div>';
     if (!empty($m['canvas_data']) && strpos($m['canvas_data'], 'data:image/') === 0) {
         echo '<img class="history-img" alt="お絵描き" src="' . h($m['canvas_data']) . '">';
@@ -43,141 +43,95 @@ function render_mail_item(array $m, string $date, string $meta = ''): void {
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ボトルメール</title>
-
-    <!-- CSSを読み込む -->
     <link rel="stylesheet" href="css/style.css">
-    <style>
-        .history-tabs { display: flex; gap: 8px; margin: 12px 0; }
-        .history-tabs button { background: #e0e0e0; color: #333; border-radius: 20px; padding: 7px 16px; font-weight: bold; }
-        .history-tabs button.active { background: #2f80c4; color: #fff; }
-        .history-panel { display: none; }
-        .history-panel.active { display: block; }
-        .history-item { border: 1px solid #d5e3ec; border-radius: 8px; padding: 12px; margin-bottom: 10px; background: #fafcfe; }
-        .history-date { font-size: 0.8rem; color: #667; margin-bottom: 6px; }
-        .history-msg { word-break: break-word; }
-        .history-img { max-width: 100%; width: 300px; height: auto; border: 1px solid #ccc; margin-top: 8px; background: #fff; }
-        .history-empty { color: #888; }
-    </style>
+    <link rel="stylesheet" href="css/bottle_mail.css">
 </head>
 
 <body>
 
     <?php require_once __DIR__ . '/header.php'; ?>
 
-    <div class="container">
+    <div class="page-wrap">
 
-        <h1>🌊 ボトルメール 🌊</h1>
+        <h1>✉️ ボトルメール</h1>
 
-        <p>メッセージを書いて海へ流そう！</p>
+        <!-- ================= 送信 ================= -->
+        <div class="panel">
+            <h3>🌊 ボトルを流す</h3>
+            <p style="margin-top:0;">メッセージを書いて海へ流そう！</p>
 
-        <!-- 送信用フォーム -->
-        <form id="mailForm" action="db/save_mail.php" method="POST">
+            <form id="mailForm" action="db/save_mail.php" method="POST">
+                <div class="field">
+                    <label for="message">メッセージ</label>
+                    <textarea id="message" name="message" rows="6" placeholder="ここにメッセージを書いてください"></textarea>
+                </div>
 
-            <!-- メッセージ入力欄 -->
-            <label for="message">
-                メッセージ
-            </label>
+                <div class="field canvas-wrap">
+                    <label for="mailCanvas">お絵描き</label>
+                    <canvas id="mailCanvas" width="400" height="250"></canvas>
+                </div>
 
-            <br>
+                <input type="hidden" name="drawing" id="drawing">
 
-            <textarea
-                id="message"
-                name="message"
-                rows="6"
-                cols="50"
-                placeholder="ここにメッセージを書いてください"></textarea>
+                <div class="btn-row">
+                    <button type="button" id="clearCanvas" class="btn btn-gray btn-lg">消す</button>
+                    <button type="submit" class="btn btn-primary btn-lg">🌊 海に流す</button>
+                </div>
+            </form>
+        </div>
 
-            <br><br>
+        <!-- ================= 受信 ================= -->
+        <div class="panel">
+            <h3>🏖 ボトルを拾う</h3>
+            <form action="db/pickup_mail.php" method="GET">
+                <button type="submit" class="btn btn-success btn-lg">📩 ボトルを拾う</button>
+            </form>
+        </div>
 
-            <!-- Step3で使うキャンバス -->
-            <canvas
-                id="mailCanvas"
-                width="400"
-                height="250"
-                style="border:1px solid black;">
-            </canvas>
+        <!-- ================= 履歴 ================= -->
+        <div class="panel" id="history">
+            <h3>📜 送受信履歴</h3>
 
-            <br><br>
+            <div class="view-tabs">
+                <button type="button" class="active" data-target="panel-sent">📤 送信（<?= count($sent_mails) ?>）</button>
+                <button type="button" data-target="panel-received">📥 受信（<?= count($received_mails) ?>）</button>
+            </div>
 
-            <button
-                type="button"
-                id="clearCanvas">
-                消す
-            </button>
+            <div id="panel-sent" class="history-panel active">
+                <?php if (empty($sent_mails)): ?>
+                    <p class="history-empty">まだボトルを流していません。</p>
+                <?php else: ?>
+                    <?php foreach ($sent_mails as $m): ?>
+                        <?php render_mail_item($m, $m['created_at'], $m['pickup_count'] . '人が拾いました'); ?>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
 
-            <br><br>
+            <div id="panel-received" class="history-panel">
+                <?php if (empty($received_mails)): ?>
+                    <p class="history-empty">まだボトルを拾っていません。</p>
+                <?php else: ?>
+                    <?php foreach ($received_mails as $m): ?>
+                        <?php render_mail_item($m, $m['received_at']); ?>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
 
-            <!-- 後で絵を送るため -->
-            <input
-                type="hidden"
-                name="drawing"
-                id="drawing">
-
-            <script>
-
-                document.getElementById("mailForm").addEventListener("submit",function(){
-
-                const canvas = document.getElementById("mailCanvas");
-
-                document.getElementById("drawing").value =
-                canvas.toDataURL();});
-
-            </script>    
-
-            <!-- 送信ボタン -->
-            <button type="submit">
-                🌊 海に流す
-            </button>
-
-        </form>
-    <hr>
-
-    <h2>🏖 ボトルを拾う</h2>
-
-    <form action="db/pickup_mail.php" method="GET">
-
-        <button type="submit">
-            📩 ボトルを拾う
-        </button>
-
-    </form>
-
-    <hr>
-
-    <h2 id="history">📜 送受信履歴</h2>
-
-    <div class="history-tabs">
-        <button type="button" class="active" data-target="panel-sent">📤 送信（<?= count($sent_mails) ?>）</button>
-        <button type="button" data-target="panel-received">📥 受信（<?= count($received_mails) ?>）</button>
-    </div>
-
-    <div id="panel-sent" class="history-panel active">
-        <?php if (empty($sent_mails)): ?>
-            <p class="history-empty">まだボトルを流していません。</p>
-        <?php else: ?>
-            <?php foreach ($sent_mails as $m): ?>
-                <?php render_mail_item($m, $m['created_at'], $m['pickup_count'] . '人が拾いました'); ?>
-            <?php endforeach; ?>
-        <?php endif; ?>
-    </div>
-
-    <div id="panel-received" class="history-panel">
-        <?php if (empty($received_mails)): ?>
-            <p class="history-empty">まだボトルを拾っていません。</p>
-        <?php else: ?>
-            <?php foreach ($received_mails as $m): ?>
-                <?php render_mail_item($m, $m['received_at']); ?>
-            <?php endforeach; ?>
-        <?php endif; ?>
-    </div>
-
-    </div>
+    </div><!-- /.page-wrap -->
 
     <script>
-        document.querySelectorAll('.history-tabs button').forEach(function (btn) {
+        // 送信時にキャンバスの絵を hidden に入れる
+        document.getElementById('mailForm').addEventListener('submit', function () {
+            document.getElementById('drawing').value = document.getElementById('mailCanvas').toDataURL();
+        });
+
+        // 送信／受信タブ切り替え
+        document.querySelectorAll('.view-tabs button').forEach(function (btn) {
             btn.addEventListener('click', function () {
-                document.querySelectorAll('.history-tabs button').forEach(function (b) { b.classList.remove('active'); });
+                document.querySelectorAll('.view-tabs button').forEach(function (b) { b.classList.remove('active'); });
                 document.querySelectorAll('.history-panel').forEach(function (p) { p.classList.remove('active'); });
                 btn.classList.add('active');
                 document.getElementById(btn.dataset.target).classList.add('active');
@@ -185,7 +139,6 @@ function render_mail_item(array $m, string $date, string $meta = ''): void {
         });
     </script>
 
-    <!-- Step3で作るJavaScript -->
     <script src="js/draw.js"></script>
 
 </body>

@@ -20,9 +20,35 @@ $stmt->bindValue(":sender", $client_id);
 
 $stmt->execute();
 
-echo "<h2>🌊 ボトルメールを海へ流しました！</h2>";
-
-echo "<a href='../bottle_mail.php'>戻る</a>";
-echo " ｜ <a href='../bottle_mail.php#history'>送受信履歴を見る</a>";
-
+// ヘッダー（ナビ）を db/ 配下から読み込むための設定
+$nav_base = '../';
+$nav_active = 'bottle_mail.php';
 ?>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ボトルメール送信完了</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/bottle_mail.css">
+</head>
+<body>
+
+    <?php require_once __DIR__ . '/../header.php'; ?>
+
+    <div class="page-wrap">
+
+        <h1>✉️ ボトルメール</h1>
+
+        <div class="flash success">🌊 ボトルメールを海へ流しました！</div>
+
+        <div class="btn-row">
+            <a href="../bottle_mail.php" class="btn btn-primary btn-lg">戻る</a>
+            <a href="../bottle_mail.php#history" class="btn btn-gray btn-lg">送受信履歴を見る</a>
+        </div>
+
+    </div>
+
+</body>
+</html>
