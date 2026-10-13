@@ -2,16 +2,30 @@
 
 require_once "db.php";
 
+$client_id = get_client_id();
+
+// 自分が流したボトルは拾わない。まだ拾っていないボトルを優先してランダムに1通選ぶ
 $sql = "
-SELECT *
-FROM bottle_mails
-ORDER BY RAND()
+SELECT m.*
+FROM bottle_mails m
+WHERE m.sender_token IS NULL OR m.sender_token <> :me
+ORDER BY
+    EXISTS (SELECT 1 FROM bottle_mail_receipts r
+            WHERE r.mail_id = m.id AND r.receiver_token = :me2) ASC,
+    RAND()
 LIMIT 1
 ";
 
-$stmt = $pdo->query($sql);
+$stmt = $pdo->prepare($sql);
+$stmt->execute([":me" => $client_id, ":me2" => $client_id]);
 
 $mail = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// 受信履歴に記録（同じボトルは1回だけ）
+if ($mail) {
+    $log = $pdo->prepare("INSERT IGNORE INTO bottle_mail_receipts (mail_id, receiver_token) VALUES (:id, :t)");
+    $log->execute([":id" => $mail["id"], ":t" => $client_id]);
+}
 
 ?>
 
@@ -41,7 +55,7 @@ $mail = $stmt->fetch(PDO::FETCH_ASSOC);
     <?php if(!empty($mail["canvas_data"])): ?>
 
         <img
-            src="<?= $mail["canvas_data"] ?>"
+            src="<?= htmlspecialchars($mail["canvas_data"], ENT_QUOTES, "UTF-8") ?>"
             width="400">
 
     <?php else: ?>
@@ -83,6 +97,8 @@ $mail = $stmt->fetch(PDO::FETCH_ASSOC);
 <a href="../bottle_mail.php">
     戻る
 </a>
+｜
+<a href="../bottle_mail.php#history">送受信履歴を見る</a>
 
 </body>
 </html>
